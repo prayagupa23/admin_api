@@ -7,6 +7,18 @@ from services.faculty_service import create_faculty, get_all_faculty, get_facult
 
 faculty_bp = Blueprint('faculty', __name__)
 
+@faculty_bp.route('/faculty/', methods=['GET'])
+def get_all_faculty_endpoint():
+    """Get all faculty members"""
+    try:
+        result = get_all_faculty()
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': f'Server error: {str(e)}'
+        }), 500
+
 @faculty_bp.route('/faculty/create', methods=['POST'])
 def create_faculty_endpoint():
     """
@@ -40,18 +52,6 @@ def create_faculty_endpoint():
         else:
             return jsonify(result), 400
             
-    except Exception as e:
-        return jsonify({
-            'success': False,
-            'message': f'Server error: {str(e)}'
-        }), 500
-
-@faculty_bp.route('/faculty/', methods=['GET'])
-def get_all_faculty_endpoint():
-    """Get all faculty members"""
-    try:
-        result = get_all_faculty()
-        return jsonify(result), 200
     except Exception as e:
         return jsonify({
             'success': False,
