@@ -3,6 +3,18 @@ from services.student_service import StudentService
 
 student_bp = Blueprint('student', __name__)
 
+@student_bp.route('/student/', methods=['GET'])
+def get_all_students():
+    """Get all students"""
+    try:
+        result = StudentService.get_all_students()
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": f"Internal server error: {str(e)}"
+        }), 500
+
 @student_bp.route('/student/create', methods=['POST'])
 def create_student():
     """
@@ -94,18 +106,6 @@ def create_student():
         else:
             return jsonify(result), 400
             
-    except Exception as e:
-        return jsonify({
-            "success": False,
-            "message": f"Internal server error: {str(e)}"
-        }), 500
-
-@student_bp.route('/student/', methods=['GET'])
-def get_all_students():
-    """Get all students"""
-    try:
-        result = StudentService.get_all_students()
-        return jsonify(result), 200
     except Exception as e:
         return jsonify({
             "success": False,

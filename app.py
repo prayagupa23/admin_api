@@ -2,7 +2,7 @@ from flask import Flask
 from flask_cors import CORS
 from routes.student_routes import student_bp
 from routes.faculty_routes import faculty_bp
-from routes.courses_root import courses_bp
+from routes.courses_routes import courses_bp
 
 app = Flask(__name__)
 CORS(app)
@@ -39,6 +39,17 @@ def home():
         }
         
     })
+
+@app.route('/debug/routes')
+def debug_routes():
+    routes = []
+    for rule in app.url_map.iter_rules():
+        routes.append({
+            'endpoint': rule.endpoint,
+            'methods': list(rule.methods),
+            'rule': str(rule)
+        })
+    return jsonify({'routes': routes})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5001, debug=False)
