@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask
 from flask_cors import CORS
 from routes.student_routes import student_bp
 from routes.faculty_routes import faculty_bp
@@ -19,24 +19,25 @@ def home():
         "version": "1.0.0",
         "endpoints": {
             "students": {
-                "create_student": "POST /student/create",
-                "get_all_students": "GET /student/",
-                "get_student": "GET /student/<student_id>",
-                "delete_student": "DELETE /student/<student_id>"
+                "create": "POST /student/create",
+                "get_all": "GET /student/",
+                "get_by_id": "GET /student/<student_id>",
+                "delete": "DELETE /student/<student_id>"
             },
             "faculty": {
-                "create_faculty": "POST /api/faculty/create",
-                "get_all_faculties": "GET /api/faculty/",
-                "get_faculty": "GET /api/faculty/<faculty_id>",
-                "delete_faculty": "DELETE /api/faculty/<faculty_id>"
+                "create": "POST /api/faculty/create",
+                "get_all": "GET /api/faculty/",
+                "get_by_id": "GET /api/faculty/<faculty_id>",
+                "delete": "DELETE /api/faculty/<faculty_id>"
             },
             "courses": {
-                "create_course": "POST /courses/create",
-                "get_all_courses": "GET /courses/",
-                "get_course": "GET /courses/<course_code>",
-                "delete_course": "DELETE /courses/<course_code>"
+                "create": "POST /courses/create",
+                "get_all": "GET /courses/",
+                "get_by_code": "GET /courses/<course_code>",
+                "delete": "DELETE /courses/<course_code>"
             }
         }
+        
     })
 
 if __name__ == "__main__":

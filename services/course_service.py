@@ -1,12 +1,10 @@
 from db import get_db_connection
+from psycopg2.extras import RealDictCursor
 
 class CourseService:
     
     @staticmethod
     def create_course(course_data):
-        """
-        Create a new course
-        """
         try:
             # Validate required fields
             required_fields = ['course_code', 'course_name', 'department', 'batch', 'credits']
@@ -57,6 +55,7 @@ class CourseService:
             cursor.close()
             conn.close()
             
+            # Return result as dict
             course_dict = {
                 'course_code': result[0],
                 'course_name': result[1],
@@ -76,45 +75,28 @@ class CourseService:
     
     @staticmethod
     def get_all_courses():
-        """
-        Get all courses
-        """
         try:
             conn = get_db_connection()
-            cursor = conn.cursor()
+            cursor = conn.cursor(cursor_factory=RealDictCursor)
             
-            cursor.execute("SELECT course_code, course_name, department, batch, credits FROM courses ORDER BY course_code")
+            cursor.execute("SELECT * FROM courses ORDER BY course_code")
             results = cursor.fetchall()
-            
-            courses = []
-            for row in results:
-                course_dict = {
-                    'course_code': row[0],
-                    'course_name': row[1],
-                    'department': row[2],
-                    'batch': row[3],
-                    'credits': row[4]
-                }
-                courses.append(course_dict)
             
             cursor.close()
             conn.close()
             
-            return {'courses': courses}, 200
+            return {'courses': results}, 200
             
         except Exception as e:
             return {'error': 'Failed to retrieve courses', 'details': str(e)}, 500
     
     @staticmethod
     def get_course_by_code(course_code):
-        """
-        Get course by code
-        """
         try:
             conn = get_db_connection()
-            cursor = conn.cursor()
+            cursor = conn.cursor(cursor_factory=RealDictCursor)
             
-            cursor.execute("SELECT course_code, course_name, department, batch, credits FROM courses WHERE course_code = %s", (course_code,))
+            cursor.execute("SELECT * FROM courses WHERE course_code = %s", (course_code,))
             result = cursor.fetchone()
             
             if not result:
@@ -122,39 +104,26 @@ class CourseService:
                 conn.close()
                 return {'error': 'Course not found'}, 404
             
-            course_dict = {
-                'course_code': result[0],
-                'course_name': result[1],
-                'department': result[2],
-                'batch': result[3],
-                'credits': result[4]
-            }
-            
             cursor.close()
             conn.close()
             
-            return {'course': course_dict}, 200
+            return {'course': result}, 200
             
         except Exception as e:
             return {'error': 'Failed to retrieve course', 'details': str(e)}, 500
     
     @staticmethod
     def delete_course(course_code):
-        """
-        Delete course by code
-        """
         try:
             conn = get_db_connection()
             cursor = conn.cursor()
             
-            # Check if course exists
             cursor.execute("SELECT course_code FROM courses WHERE course_code = %s", (course_code,))
             if not cursor.fetchone():
                 cursor.close()
                 conn.close()
                 return {'error': 'Course not found'}, 404
             
-            # Delete course
             cursor.execute("DELETE FROM courses WHERE course_code = %s", (course_code,))
             conn.commit()
             

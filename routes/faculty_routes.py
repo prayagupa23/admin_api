@@ -3,11 +3,11 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from services.faculty_service import create_faculty, get_all_faculties, get_faculty_by_id, delete_faculty
+from services.faculty_service import create_faculty, get_all_faculty, get_faculty_by_id, delete_faculty
 
 faculty_bp = Blueprint('faculty', __name__)
 
-@faculty_bp.route('/create', methods=['POST'])
+@faculty_bp.route('/faculty/create', methods=['POST'])
 def create_faculty_endpoint():
     """
     Create a new faculty member
@@ -46,57 +46,42 @@ def create_faculty_endpoint():
             'message': f'Server error: {str(e)}'
         }), 500
 
-@faculty_bp.route('/', methods=['GET'])
-def get_all_faculties_endpoint():
-    """
-    Get all faculties
-    """
+@faculty_bp.route('/faculty/', methods=['GET'])
+def get_all_faculty_endpoint():
+    """Get all faculty members"""
     try:
-        result = get_all_faculties()
-        
-        if result['success']:
-            return jsonify(result), 200
-        else:
-            return jsonify(result), 500
-            
+        result = get_all_faculty()
+        return jsonify(result), 200
     except Exception as e:
         return jsonify({
             'success': False,
             'message': f'Server error: {str(e)}'
         }), 500
 
-@faculty_bp.route('/<faculty_id>', methods=['GET'])
+@faculty_bp.route('/faculty/<faculty_id>', methods=['GET'])
 def get_faculty_endpoint(faculty_id):
-    """
-    Get faculty by ID
-    """
+    """Get faculty by ID"""
     try:
         result = get_faculty_by_id(faculty_id)
-        
         if result['success']:
             return jsonify(result), 200
         else:
             return jsonify(result), 404
-            
     except Exception as e:
         return jsonify({
             'success': False,
             'message': f'Server error: {str(e)}'
         }), 500
 
-@faculty_bp.route('/<faculty_id>', methods=['DELETE'])
+@faculty_bp.route('/faculty/<faculty_id>', methods=['DELETE'])
 def delete_faculty_endpoint(faculty_id):
-    """
-    Delete faculty by ID
-    """
+    """Delete faculty by ID"""
     try:
         result = delete_faculty(faculty_id)
-        
         if result['success']:
             return jsonify(result), 200
         else:
             return jsonify(result), 404
-            
     except Exception as e:
         return jsonify({
             'success': False,
