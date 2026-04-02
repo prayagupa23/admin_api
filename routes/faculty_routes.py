@@ -3,7 +3,7 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from services.faculty_service import create_faculty
+from services.faculty_service import create_faculty, get_all_faculty, get_faculty_by_id, delete_faculty
 
 faculty_bp = Blueprint('faculty', __name__)
 
@@ -40,6 +40,48 @@ def create_faculty_endpoint():
         else:
             return jsonify(result), 400
             
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': f'Server error: {str(e)}'
+        }), 500
+
+@faculty_bp.route('/faculty/', methods=['GET'])
+def get_all_faculty_endpoint():
+    """Get all faculty members"""
+    try:
+        result = get_all_faculty()
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': f'Server error: {str(e)}'
+        }), 500
+
+@faculty_bp.route('/faculty/<faculty_id>', methods=['GET'])
+def get_faculty_endpoint(faculty_id):
+    """Get faculty by ID"""
+    try:
+        result = get_faculty_by_id(faculty_id)
+        if result['success']:
+            return jsonify(result), 200
+        else:
+            return jsonify(result), 404
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': f'Server error: {str(e)}'
+        }), 500
+
+@faculty_bp.route('/faculty/<faculty_id>', methods=['DELETE'])
+def delete_faculty_endpoint(faculty_id):
+    """Delete faculty by ID"""
+    try:
+        result = delete_faculty(faculty_id)
+        if result['success']:
+            return jsonify(result), 200
+        else:
+            return jsonify(result), 404
     except Exception as e:
         return jsonify({
             'success': False,

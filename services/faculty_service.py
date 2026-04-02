@@ -3,6 +3,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from db import get_db_connection
+from psycopg2.extras import RealDictCursor
 
 def create_faculty(faculty_data):
     """
@@ -88,4 +89,114 @@ def create_faculty(faculty_data):
         return {
             'success': False,
             'message': f'Database error: {str(e)}'
+        }
+
+def get_all_faculty():
+    """Get all faculty members from database"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        
+        cursor.execute("""
+            SELECT faculty_id, name, email, phone, department, designation
+            FROM faculty 
+            ORDER BY faculty_id
+        """)
+        
+        faculty_list = cursor.fetchall()
+        
+        cursor.close()
+        conn.close()
+        
+        return {
+            "success": True,
+            "data": faculty_list,
+            "count": len(faculty_list)
+        }
+        
+    except Exception as e:
+        if 'conn' in locals():
+            cursor.close()
+            conn.close()
+        
+        return {
+            "success": False,
+            "message": f"Error retrieving faculty: {str(e)}"
+        }
+
+def get_faculty_by_id(faculty_id):
+    """Get a specific faculty member by ID"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        
+        cursor.execute("""
+            SELECT faculty_id, name, email, phone, department, designation
+            FROM faculty 
+            WHERE faculty_id = %s
+        """, (faculty_id,))
+        
+        faculty = cursor.fetchone()
+        
+        cursor.close()
+        conn.close()
+        
+        if not faculty:
+            return {
+                "success": False,
+                "message": "Faculty not found"
+            }
+        
+        return {
+            "success": True,
+            "data": faculty
+        }
+        
+    except Exception as e:
+        if 'conn' in locals():
+            cursor.close()
+            conn.close()
+        
+        return {
+            "success": False,
+            "message": f"Error retrieving faculty: {str(e)}"
+        }
+
+def delete_faculty(faculty_id):
+    """Delete a faculty member by ID"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Check if faculty exists
+        cursor.execute("SELECT faculty_id FROM faculty WHERE faculty_id = %s", (faculty_id,))
+        if not cursor.fetchone():
+            cursor.close()
+            conn.close()
+            return {
+                "success": False,
+                "message": "Faculty not found"
+            }
+        
+        # Delete faculty
+        cursor.execute("DELETE FROM faculty WHERE faculty_id = %s", (faculty_id,))
+        conn.commit()
+        
+        cursor.close()
+        conn.close()
+        
+        return {
+            "success": True,
+            "message": "Faculty deleted successfully"
+        }
+        
+    except Exception as e:
+        if 'conn' in locals():
+            conn.rollback()
+            cursor.close()
+            conn.close()
+        
+        return {
+            "success": False,
+            "message": f"Error deleting faculty: {str(e)}"
         }

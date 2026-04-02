@@ -99,3 +99,45 @@ def create_student():
             "success": False,
             "message": f"Internal server error: {str(e)}"
         }), 500
+
+@student_bp.route('/student/', methods=['GET'])
+def get_all_students():
+    """Get all students"""
+    try:
+        result = StudentService.get_all_students()
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": f"Internal server error: {str(e)}"
+        }), 500
+
+@student_bp.route('/student/<student_id>', methods=['GET'])
+def get_student(student_id):
+    """Get student by ID"""
+    try:
+        result = StudentService.get_student_by_id(student_id)
+        if result['success']:
+            return jsonify(result), 200
+        else:
+            return jsonify(result), 404
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": f"Internal server error: {str(e)}"
+        }), 500
+
+@student_bp.route('/student/<student_id>', methods=['DELETE'])
+def delete_student(student_id):
+    """Delete student by ID"""
+    try:
+        result = StudentService.delete_student(student_id)
+        if result['success']:
+            return jsonify(result), 200
+        else:
+            return jsonify(result), 404
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": f"Internal server error: {str(e)}"
+        }), 500

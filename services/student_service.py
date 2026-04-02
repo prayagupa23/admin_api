@@ -1,4 +1,5 @@
 from db import get_db_connection
+from psycopg2.extras import RealDictCursor
 
 class StudentService:
     @staticmethod
@@ -88,3 +89,116 @@ class StudentService:
                     "success": False,
                     "message": f"Error creating student: {error_message}"
                 }
+    
+    @staticmethod
+    def get_all_students():
+        """Get all students from database"""
+        try:
+            conn = get_db_connection()
+            cursor = conn.cursor(cursor_factory=RealDictCursor)
+            
+            cursor.execute("""
+                SELECT student_id, name, email, phone, department, year, roll_number, sgpa
+                FROM students 
+                ORDER BY student_id
+            """)
+            
+            students = cursor.fetchall()
+            
+            cursor.close()
+            conn.close()
+            
+            return {
+                "success": True,
+                "data": students,
+                "count": len(students)
+            }
+            
+        except Exception as e:
+            if 'conn' in locals():
+                cursor.close()
+                conn.close()
+            
+            return {
+                "success": False,
+                "message": f"Error retrieving students: {str(e)}"
+            }
+    
+    @staticmethod
+    def get_student_by_id(student_id):
+        """Get a specific student by ID"""
+        try:
+            conn = get_db_connection()
+            cursor = conn.cursor(cursor_factory=RealDictCursor)
+            
+            cursor.execute("""
+                SELECT student_id, name, email, phone, department, year, roll_number, sgpa
+                FROM students 
+                WHERE student_id = %s
+            """, (student_id,))
+            
+            student = cursor.fetchone()
+            
+            cursor.close()
+            conn.close()
+            
+            if not student:
+                return {
+                    "success": False,
+                    "message": "Student not found"
+                }
+            
+            return {
+                "success": True,
+                "data": student
+            }
+            
+        except Exception as e:
+            if 'conn' in locals():
+                cursor.close()
+                conn.close()
+            
+            return {
+                "success": False,
+                "message": f"Error retrieving student: {str(e)}"
+            }
+    
+    @staticmethod
+    def delete_student(student_id):
+        """Delete a student by ID"""
+        try:
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            
+            # Check if student exists
+            cursor.execute("SELECT student_id FROM students WHERE student_id = %s", (student_id,))
+            if not cursor.fetchone():
+                cursor.close()
+                conn.close()
+                return {
+                    "success": False,
+                    "message": "Student not found"
+                }
+            
+            # Delete student
+            cursor.execute("DELETE FROM students WHERE student_id = %s", (student_id,))
+            conn.commit()
+            
+            cursor.close()
+            conn.close()
+            
+            return {
+                "success": True,
+                "message": "Student deleted successfully"
+            }
+            
+        except Exception as e:
+            if 'conn' in locals():
+                conn.rollback()
+                cursor.close()
+                conn.close()
+            
+            return {
+                "success": False,
+                "message": f"Error deleting student: {str(e)}"
+            }
